@@ -12,6 +12,7 @@ public class EnvVarZkACLProviderTest {
     private static final String ACL_SINGLE = "digest user1:12345";
     private static final String ACL_MALFORMED = "digestuser1:12345";
     private static final String ACL_MULTIPLE = "digest user1:12345,x509 Zookeeper CLI,x509 solr-staging";
+    private static final String ACL_SPACES = "x509 ZK CLI,x509 Peter Molnar";
 
     @Test
     void shouldLoadNullAclList() {
@@ -31,6 +32,15 @@ public class EnvVarZkACLProviderTest {
     void shouldIgnoreMalformedAcl() {
         final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(ACL_MALFORMED, "");
         assertThat(aclProvider.createSecurityACLsToAdd()).isEmpty();
+        assertThat(aclProvider.createNonSecurityACLsToAdd()).isEmpty();
+    }
+
+    @Test
+    void shouldParseMultipleSpaces() {
+        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(ACL_SPACES, "");
+        assertThat(aclProvider.createSecurityACLsToAdd()).containsExactly(
+                createX509ACL("ZK CLI", ZooDefs.Perms.ALL),
+                createX509ACL("Peter Molnar", ZooDefs.Perms.ALL));
         assertThat(aclProvider.createNonSecurityACLsToAdd()).isEmpty();
     }
 
