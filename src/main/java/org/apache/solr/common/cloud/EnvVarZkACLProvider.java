@@ -21,8 +21,12 @@ public class EnvVarZkACLProvider extends SecurityAwareZkACLProvider {
     private final List<ACL> nonSecurityAcls;
 
     public EnvVarZkACLProvider() {
-        securityAcls = createAcls(ZooDefs.Perms.ALL, System.getenv(SOLR_ZK_SECURITY_ACLS));
-        nonSecurityAcls = createAcls(ZooDefs.Perms.READ, System.getenv(SOLR_ZK_NON_SECURITY_ACLS));
+        this(System.getenv(SOLR_ZK_SECURITY_ACLS), System.getenv(SOLR_ZK_NON_SECURITY_ACLS));
+    }
+
+    public EnvVarZkACLProvider(String solrZkSecurityAcls, String solrZkNonSecurityAcls) {
+        securityAcls = createAcls(ZooDefs.Perms.ALL, solrZkSecurityAcls);
+        nonSecurityAcls = createAcls(ZooDefs.Perms.READ, solrZkNonSecurityAcls);
     }
 
     private static List<ACL> createAcls(final int perms, final String envVarValue) {
@@ -48,7 +52,7 @@ public class EnvVarZkACLProvider extends SecurityAwareZkACLProvider {
         }
 
         final String scheme = credentials.substring(0, spacePos);
-        final String auth = credentials.substring(spacePos);
+        final String auth = credentials.substring(spacePos + 1);
 
         if (StringUtils.isEmpty(scheme) || StringUtils.isEmpty(auth)) {
             return Optional.empty();
