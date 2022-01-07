@@ -1,16 +1,12 @@
 package org.apache.solr.common.cloud;
 
-import lombok.Value;
-import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class EnvVarZkACLProvider extends SecurityAwareZkACLProvider {
 
@@ -30,35 +26,11 @@ public class EnvVarZkACLProvider extends SecurityAwareZkACLProvider {
     }
 
     private static List<ACL> createAcls(final int perms, final String envVarValue) {
-        return parseEnvVar(envVarValue)
-                .map(zkIdentity -> new ACL(perms, new Id(zkIdentity.getScheme(), zkIdentity.getAuth())))
+        return EnvVarZkCredentialsParser.parseEnvVar(envVarValue)
+                .map(zkCredentials -> new ACL(perms, new Id(
+                        zkCredentials.getScheme(),
+                        new String(zkCredentials.getAuth(), StandardCharsets.UTF_8))))
                 .collect(Collectors.toList());
-    }
-
-    private static Stream<ZkIdentity> parseEnvVar(final String envVarValue) {
-        final String[] identities = Optional.ofNullable(envVarValue)
-                .map(s -> StringUtils.split(s, ','))
-                .orElse(new String[0]);
-
-        return Arrays.stream(identities)
-                .map(EnvVarZkACLProvider::parseZkCredentials)
-                .flatMap(Optional::stream);
-    }
-
-    private static Optional<ZkIdentity> parseZkCredentials(String credentials) {
-        int spacePos = credentials.indexOf(' ');
-        if (spacePos < 0) {
-            return Optional.empty();
-        }
-
-        final String scheme = credentials.substring(0, spacePos);
-        final String auth = credentials.substring(spacePos + 1);
-
-        if (StringUtils.isEmpty(scheme) || StringUtils.isEmpty(auth)) {
-            return Optional.empty();
-        }
-
-        return Optional.of(new ZkIdentity(scheme, auth));
     }
 
 
@@ -70,11 +42,5 @@ public class EnvVarZkACLProvider extends SecurityAwareZkACLProvider {
     @Override
     protected List<ACL> createSecurityACLsToAdd() {
         return securityAcls;
-    }
-
-    @Value
-    private static class ZkIdentity {
-        String scheme;
-        String auth;
     }
 }

@@ -14,41 +14,15 @@ public class EnvVarZkACLProviderTest {
     private static final String ACL_MULTIPLE = "digest user1:12345,x509 Zookeeper CLI,x509 solr-staging";
     private static final String ACL_SPACES = "x509 ZK CLI,x509 Peter Molnar";
 
-    @Test
-    void shouldLoadNullAclList() {
-        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(null, null);
-        assertThat(aclProvider.createSecurityACLsToAdd()).isEmpty();
-        assertThat(aclProvider.createNonSecurityACLsToAdd()).isEmpty();
-    }
+    private static final String ACL_1 = "digest user1:12345";
+    private static final String ACL_2 = "x509 solr-staging";
 
-    @Test
-    void shouldLoadEmptyAclList() {
-        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider("", "");
-        assertThat(aclProvider.createSecurityACLsToAdd()).isEmpty();
-        assertThat(aclProvider.createNonSecurityACLsToAdd()).isEmpty();
-    }
-
-    @Test
-    void shouldIgnoreMalformedAcl() {
-        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(ACL_MALFORMED, "");
-        assertThat(aclProvider.createSecurityACLsToAdd()).isEmpty();
-        assertThat(aclProvider.createNonSecurityACLsToAdd()).isEmpty();
-    }
-
-    @Test
-    void shouldParseMultipleSpaces() {
-        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(ACL_SPACES, "");
-        assertThat(aclProvider.createSecurityACLsToAdd()).containsExactly(
-                createX509ACL("ZK CLI", ZooDefs.Perms.ALL),
-                createX509ACL("Peter Molnar", ZooDefs.Perms.ALL));
-        assertThat(aclProvider.createNonSecurityACLsToAdd()).isEmpty();
-    }
 
     @Test
     void shouldLoadSingleSecurityAcl() {
         final ACL acl = createDigestACL("user1", "12345", ZooDefs.Perms.ALL);
 
-        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(ACL_SINGLE, null);
+        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(ACL_1, null);
         assertThat(aclProvider.createSecurityACLsToAdd()).containsExactly(acl);
         assertThat(aclProvider.createNonSecurityACLsToAdd()).isEmpty();
     }
@@ -57,7 +31,7 @@ public class EnvVarZkACLProviderTest {
     void shouldLoadSingleNonSecurityAcl() {
         final ACL acl = createDigestACL("user1", "12345", ZooDefs.Perms.READ);
 
-        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(null, ACL_SINGLE);
+        final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(null, ACL_1);
         assertThat(aclProvider.createSecurityACLsToAdd()).isEmpty();
         assertThat(aclProvider.createNonSecurityACLsToAdd()).containsExactly(acl);
     }
