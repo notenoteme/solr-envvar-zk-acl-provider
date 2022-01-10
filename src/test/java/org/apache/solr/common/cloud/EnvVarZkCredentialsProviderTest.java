@@ -8,8 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class EnvVarZkCredentialsProviderTest {
 
-    private static final String CREDENTIALS_1 = "digest user1:12345";
-    private static final String CREDENTIALS_2 = "x509 solr-staging";
+    private static final String CREDENTIALS_1 = "digest|user1:12345|rwcda";
 
     @Test
     void shouldLoadSingleSecurityCredential() {

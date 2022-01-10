@@ -21,18 +21,17 @@ public class EnvVarZkACLProvider extends SecurityAwareZkACLProvider {
     }
 
     public EnvVarZkACLProvider(String solrZkSecurityAcls, String solrZkNonSecurityAcls) {
-        securityAcls = createAcls(ZooDefs.Perms.ALL, solrZkSecurityAcls);
-        nonSecurityAcls = createAcls(ZooDefs.Perms.READ, solrZkNonSecurityAcls);
+        securityAcls = createAcls(solrZkSecurityAcls);
+        nonSecurityAcls = createAcls(solrZkNonSecurityAcls);
     }
 
-    private static List<ACL> createAcls(final int perms, final String envVarValue) {
+    private static List<ACL> createAcls(final String envVarValue) {
         return EnvVarZkCredentialsParser.parseEnvVar(envVarValue)
-                .map(zkCredentials -> new ACL(perms, new Id(
-                        zkCredentials.getScheme(),
-                        new String(zkCredentials.getAuth(), StandardCharsets.UTF_8))))
+                .map(envVarACL -> new ACL(envVarACL.getPermissions(), new Id(
+                        envVarACL.getScheme(),
+                        envVarACL.getAuth())))
                 .collect(Collectors.toList());
     }
-
 
     @Override
     protected List<ACL> createNonSecurityACLsToAdd() {

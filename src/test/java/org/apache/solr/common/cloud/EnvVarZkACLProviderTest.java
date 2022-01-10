@@ -9,14 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class EnvVarZkACLProviderTest {
 
-    private static final String ACL_SINGLE = "digest user1:12345";
-    private static final String ACL_MALFORMED = "digestuser1:12345";
-    private static final String ACL_MULTIPLE = "digest user1:12345,x509 Zookeeper CLI,x509 solr-staging";
-    private static final String ACL_SPACES = "x509 ZK CLI,x509 Peter Molnar";
-
-    private static final String ACL_1 = "digest user1:12345";
-    private static final String ACL_2 = "x509 solr-staging";
-
+    private static final String ACL_1 = "digest|user1:12345|crdwa";
+    private static final String ACL_MULTIPLE = "digest|user1:12345|crdwa,x509|Zookeeper CLI|r,x509|solr-staging|r";
 
     @Test
     void shouldLoadSingleSecurityAcl() {
@@ -29,7 +23,7 @@ public class EnvVarZkACLProviderTest {
 
     @Test
     void shouldLoadSingleNonSecurityAcl() {
-        final ACL acl = createDigestACL("user1", "12345", ZooDefs.Perms.READ);
+        final ACL acl = createDigestACL("user1", "12345", ZooDefs.Perms.ALL);
 
         final EnvVarZkACLProvider aclProvider = new EnvVarZkACLProvider(null, ACL_1);
         assertThat(aclProvider.createSecurityACLsToAdd()).isEmpty();
@@ -39,7 +33,7 @@ public class EnvVarZkACLProviderTest {
     @Test
     void shouldLoadMultipleAcls() {
         final ACL[] acls = new ACL[]{
-                createDigestACL("user1", "12345", ZooDefs.Perms.READ),
+                createDigestACL("user1", "12345", ZooDefs.Perms.ALL),
                 createX509ACL("Zookeeper CLI", ZooDefs.Perms.READ),
                 createX509ACL("solr-staging", ZooDefs.Perms.READ)
         };

@@ -1,5 +1,6 @@
 package org.apache.solr.common.cloud;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +21,8 @@ public class EnvVarZkCredentialsProvider implements ZkCredentialsProvider {
         credentials = Stream.concat(
                         EnvVarZkCredentialsParser.parseEnvVar(solrZkSecurityAcls),
                         EnvVarZkCredentialsParser.parseEnvVar(solrZkNonSecurityAcls))
+                .distinct()
+                .map(zkAcl -> new ZkCredentials(zkAcl.getScheme(), zkAcl.getAuth().getBytes(StandardCharsets.UTF_8)))
                 .collect(Collectors.toList());
     }
 
