@@ -1,7 +1,7 @@
 package org.apache.solr.common.cloud;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 
 import java.util.Arrays;
